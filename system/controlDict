@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     compressibleInterFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         2e-4;
+
+deltaT          1e-8;
+
+writeControl    adjustableRunTime;
+
+writeInterval   1e-6;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   10;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.5;
+maxAcousticCo   0.5;
+
+maxDeltaT       2.5e-10;
+maxAlphaCo      1;
+
+functions
+{
+    minMaxMag
+    {
+        type            fieldMinMax;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        log             true;
+        write           true;
+        fields
+        (
+            U
+        );
+    }
+    maxPressure
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    timeStep;
+        log             true;
+        writeFields     false;
+        regionType      patch;
+        name            walls;
+        operation       max;
+        fields
+        (
+            p
+            p_rgh
+        );
+    }
+    forces
+    {
+        type            forces;
+        libs            ("libforces.so");
+        patches         (walls);
+        rhoInf          1000.0;
+        log             on;
+        writeControl    timeStep;
+        writeInterval   1;
+        CofR            (0 0 0);
+    }
+}
+
+// ************************************************************************* //
